@@ -3,49 +3,62 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class ClothingImageController extends Controller
 {
     public function generateImage(Request $request)
     {
-        // Get the season from the user input or detect it automatically
-        $selectedSeason = $request->input('season');
-        $season = $selectedSeason ?? $this->getSeason(Carbon::now()->month);
+        $season = $request->input('season', 'Winter');
+        $gender = $request->input('gender', 'Unisex');
+        $occasion = $request->input('occasion', 'Casual');
 
-        // Generate clothing description based on season
-        $clothingPrompt = $this->getClothingSuggestion($season);
+        $clothingPrompt = $this->getClothingSuggestion($season, $gender, $occasion);
 
-        // Generate image using Pollinations AI
-        $imageUrl = "https://image.pollinations.ai/prompt/" . urlencode($clothingPrompt);
+        $variations = [
+            $clothingPrompt,
+            $clothingPrompt . ' with accessories',
+            'trendy ' . $clothingPrompt
+        ];
 
-        return view('weather', compact('imageUrl', 'season', 'clothingPrompt'));
+        $imageUrls = array_map(fn($prompt) => "https://image.pollinations.ai/prompt/" . urlencode($prompt), $variations);
+
+        $tipsMap = [
+            'Winter' => ['Layer up with thermals', 'Wear insulated boots', 'Use moisturizers for dry skin'],
+            'Summer' => ['Prefer cotton fabrics', 'Wear sunglasses', 'Stay hydrated'],
+            'Spring' => ['Use breathable fabrics', 'Pastel shades work best', 'Light jackets for evenings'],
+            'Autumn' => ['Earth tone clothes', 'Light layering', 'Boots and cardigans']
+        ];
+
+        $tips = $tipsMap[$season] ?? [];
+
+        return view('weather', compact('season', 'gender', 'occasion', 'clothingPrompt', 'imageUrls', 'tips'));
     }
 
-    private function getSeason($month)
+    private function getClothingSuggestion($season, $gender, $occasion)
     {
-        if (in_array($month, [12, 1, 2])) {
-            return 'Winter';
-        } elseif (in_array($month, [3, 4, 5])) {
-            return 'Spring';
-        } elseif (in_array($month, [6, 7, 8])) {
-            return 'Summer';
-        } else {
-            return 'Autumn';
-        }
-    }
+        $data = [
+            'Winter' => [
+                'Male' => 'a man in a wool coat and scarf for ' . $occasion,
+                'Female' => 'a woman in a cozy jacket and beanie for ' . $occasion,
+                'Unisex' => 'a warm coat with boots and gloves for ' . $occasion
+            ],
+            'Summer' => [
+                'Male' => 'a man in shorts and a light shirt for ' . $occasion,
+                'Female' => 'a woman in a cotton dress and hat for ' . $occasion,
+                'Unisex' => 'light t-shirt and shorts for ' . $occasion
+            ],
+            'Spring' => [
+                'Male' => 'a man in a floral shirt and chinos for ' . $occasion,
+                'Female' => 'a woman in a pastel dress with a light scarf for ' . $occasion,
+                'Unisex' => 'light jacket and jeans with soft colors for ' . $occasion
+            ],
+            'Autumn' => [
+                'Male' => 'a man in a brown jacket and jeans for ' . $occasion,
+                'Female' => 'a woman in an earth-tone cardigan and skirt for ' . $occasion,
+                'Unisex' => 'warm flannel and boots for ' . $occasion
+            ]
+        ];
 
-    private function getClothingSuggestion($season)
-    {
-        switch ($season) {
-            case 'Winter':
-                return "warm winter coat, gloves, scarf, and boots for snowy weather";
-            case 'Spring':
-                return "light jacket and jeans for mild spring weather";
-            case 'Summer':
-                return "t-shirt, shorts, and sunglasses for hot summer weather";
-            case 'Autumn':
-                return "sweater, jeans, and boots for cool autumn weather";
-        }
+        return $data[$season][$gender] ?? $data[$season]['Unisex'];
     }
 }
