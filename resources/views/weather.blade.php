@@ -5,10 +5,9 @@
     <title>Seasonal Clothing Suggestion</title>
     <link rel="manifest" href="/manifest.json">
     <style>
-        /* Root CSS Variables */
         :root {
             --bg-light: #f7f7f7;
-            --bg-dark: #181818;
+            --bg-dark: #121212;
             --text-light: #f5f5f5;
             --text-dark: #2f2f2f;
             --accent-color: #3498db;
@@ -16,82 +15,78 @@
             --button-hover-color: #2980b9;
             --card-shadow: rgba(0, 0, 0, 0.1);
             --transition-speed: 0.3s;
-            --font-family: 'Roboto', sans-serif;
+            --font-family: 'Segoe UI', sans-serif;
         }
 
-        /* Dark Mode */
         .dark-mode {
-            --bg-light: #2e2e2e;
+            --bg-light: #1c1c1c;
             --text-light: #e6e6e6;
             --accent-color: #1abc9c;
             --highlight-color: #ff6347;
+            --button-hover-color: #16a085;
         }
 
         body {
             font-family: var(--font-family);
             background-color: var(--bg-light);
             color: var(--text-dark);
-            padding: 50px 20px;
+            padding: 40px 20px;
             margin: 0;
-            transition: background-color var(--transition-speed), color var(--transition-speed);
+            transition: all var(--transition-speed) ease-in-out;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         h1, h3 {
-            font-size: 2.5rem;
-            color: var(--accent-color);
-            margin-bottom: 30px;
+            font-size: 2.3rem;
             text-align: center;
-            font-weight: 700;
-            letter-spacing: 1px;
+            margin-bottom: 25px;
+            color: var(--accent-color);
         }
 
-        /* Form Section Styling */
         form {
             width: 100%;
-            max-width: 550px;
-            background-color: #fff;
+            max-width: 600px;
+            background: #fff;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 6px 25px var(--card-shadow);
-            text-align: left;
-            transition: box-shadow var(--transition-speed);
+            border-radius: 16px;
+            box-shadow: 0 4px 25px var(--card-shadow);
+            margin-bottom: 40px;
         }
 
-        form:hover {
-            box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.2);
+        form div {
+            margin-bottom: 20px;
         }
 
         label {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
             font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
             color: var(--text-dark);
         }
 
         select, button {
             width: 100%;
-            padding: 15px;
-            font-size: 1.1rem;
+            padding: 12px 16px;
+            font-size: 1rem;
             border-radius: 10px;
-            border: 1px solid #ddd;
-            margin: 10px 0;
-            background-color: var(--accent-color);
-            color: white;
-            cursor: pointer;
-            transition: background-color var(--transition-speed), transform var(--transition-speed);
+            border: 1px solid #ccc;
+            transition: all var(--transition-speed);
         }
 
         select {
             background-color: #fff;
             color: var(--text-dark);
-            border: 1px solid #ddd;
         }
 
         button {
             margin-top: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         button:hover {
@@ -99,84 +94,15 @@
             transform: scale(1.05);
         }
 
-        /* Image Container */
-        .image-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .image-container div {
-            position: relative;
-            transition: transform var(--transition-speed);
-        }
-
-        .image-container img {
-            width: 320px;
-            height: auto;
-            border-radius: 20px;
-            box-shadow: 0px 8px 40px rgba(0, 0, 0, 0.2);
-            transition: transform var(--transition-speed);
-        }
-
-        .image-container div:hover img {
-            transform: scale(1.08);
-        }
-
-        .download-btn {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--highlight-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color var(--transition-speed), transform var(--transition-speed);
-        }
-
-        .download-btn:hover {
-            background-color: #e74c3c;
-            transform: scale(1.1);
-        }
-
-        /* Tips List */
-        ul {
-            list-style: none;
-            padding: 0;
-            max-width: 700px;
-            margin: 30px auto;
-            text-align: left;
-            font-size: 1.2rem;
-            color: var(--text-dark);
-        }
-
-        ul li {
-            margin: 15px 0;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-        }
-
-        ul li::before {
-            content: "✔️ ";
-            margin-right: 12px;
-            color: var(--accent-color);
-        }
-
-        /* Button for Theme Toggle */
         .theme-toggle-btn {
             background-color: var(--highlight-color);
-            color: white;
-            padding: 14px 25px;
-            font-size: 1.1rem;
+            padding: 12px 24px;
+            font-size: 1rem;
             border-radius: 10px;
-            margin-top: 30px;
             cursor: pointer;
+            border: none;
+            color: white;
+            margin-bottom: 40px;
             transition: background-color var(--transition-speed);
         }
 
@@ -184,15 +110,83 @@
             background-color: #e74c3c;
         }
 
-        /* Responsive Layout */
+        /* Suggestion Box */
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .image-container div {
+            background-color: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+            transition: transform var(--transition-speed);
+            max-width: 320px;
+            position: relative;
+        }
+
+        .image-container div:hover {
+            transform: translateY(-5px);
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .download-btn {
+            display: block;
+            width: 80%;
+            margin: 12px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background-color: #e74c3c;
+        }
+
+        ul {
+            max-width: 700px;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        ul li {
+            background: #fff;
+            margin: 10px 0;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        ul li::before {
+            content: '✔️';
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+
         @media (max-width: 768px) {
-            body {
+            form {
                 padding: 20px;
             }
 
-            form {
-                width: 100%;
-                padding: 25px;
+            h1 {
+                font-size: 2rem;
             }
 
             .image-container {
@@ -223,7 +217,6 @@
     <div>
         <label for="gender">Gender:</label>
         <select name="gender" id="gender">
-            <option value="Unisex" {{ $gender == 'Unisex' ? 'selected' : '' }}>Unisex</option>
             <option value="Male" {{ $gender == 'Male' ? 'selected' : '' }}>Male</option>
             <option value="Female" {{ $gender == 'Female' ? 'selected' : '' }}>Female</option>
         </select>
