@@ -11,7 +11,7 @@ class ClothingImageController extends Controller
 
     public function generateImage(Request $request)
     {
-        $season = $request->input('season', 'Winter');
+        $season = $request->input('season', 'Summer');
         $gender = $request->input('gender', 'Female');
         $occasion = $request->input('occasion', 'Casual');
 
