@@ -2,41 +2,95 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\WeatherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
 class ClothingImageController extends Controller
 {
+    protected $weatherService;
+
     private const MAX_SEARCH_COUNT = 5;
+
+    public function __construct(WeatherService $weatherService)
+    {
+        $this->weatherService = $weatherService;
+    }
 
     public function generateImage(Request $request)
     {
-        $season = $request->input('season', 'Summer');
-        $gender = $request->input('gender', 'Female');
+        $city = $request->input('city', 'New York');
+        $gender = $request->input('gender', 'Male');
         $occasion = $request->input('occasion', 'Casual');
+        
+        // Get weather data
+        $weatherData = $this->weatherService->getWeatherByCity($city);
+        
+        if ($weatherData) {
+            $temperature = $weatherData['main']['temp'];
+            $season = $this->weatherService->getSeasonFromTemperature($temperature);
+            $weatherDescription = $weatherData['weather'][0]['description'];
+            $humidity = $weatherData['main']['humidity'];
+            $weather = $weatherDescription;
+        } else {
+            $season = $request->input('season', 'Summer');
+            $temperature = null;
+            $weatherDescription = null;
+            $humidity = null;
+            $weather = null;
+        }
 
-        // Normalize values
-        $season = ucfirst(strtolower($season));
-        $gender = ucfirst(strtolower($gender));
-        $occasion = ucfirst(strtolower($occasion));
+        // Generate tips based on weather
+        $tips = $this->generateTips($season, $temperature, $humidity);
 
-        // Validate against allowed inputs
-        $validSeasons = ['Winter', 'Summer', 'Spring', 'Autumn'];
-        $validGenders = ['Male', 'Female'];
-        $validOccasions = ['Casual', 'Formal', 'Party'];
+        // Get clothing suggestion and generate image URLs
+        $suggestedOutfit = $this->getClothingSuggestion($season, $gender, $occasion);
+        $imageUrls = $this->getImageUrls($suggestedOutfit);
 
-        if (!in_array($season, $validSeasons)) $season = 'Winter';
-        if (!in_array($gender, $validGenders)) $gender = 'Female';
-        if (!in_array($occasion, $validOccasions)) $occasion = 'Casual';
+        return view('weather', compact(
+            'season',
+            'gender',
+            'occasion',
+            'imageUrls',
+            'tips',
+            'temperature',
+            'weatherDescription',
+            'humidity',
+            'city',
+            'suggestedOutfit',
+            'weather'
+        ));
+    }
 
-        // Get prompt and image
-        $clothingPrompt = $this->getClothingSuggestion($season, $gender, $occasion);
-        $imageUrls = $this->getImageUrls($clothingPrompt);
+    protected function generateTips($season, $temperature, $humidity)
+    {
+        $tips = [];
 
-        // Season tips
-        $tips = $this->getTips($season);
+        if ($temperature !== null) {
+            if ($temperature < 10) {
+                $tips[] = "It's quite cold! Layer up with warm clothing.";
+                $tips[] = "Consider wearing thermal undergarments.";
+                $tips[] = "Don't forget gloves and a warm hat.";
+            } elseif ($temperature < 20) {
+                $tips[] = "Mild weather - perfect for layering.";
+                $tips[] = "A light jacket or sweater would be ideal.";
+                $tips[] = "Consider bringing an umbrella just in case.";
+            } else {
+                $tips[] = "Warm weather - light and breathable fabrics recommended.";
+                $tips[] = "Stay hydrated and wear sunscreen.";
+                $tips[] = "Consider wearing a hat for sun protection.";
+            }
+        }
 
-        return view('weather', compact('season', 'gender', 'occasion', 'clothingPrompt', 'imageUrls', 'tips'));
+        if ($humidity !== null) {
+            if ($humidity > 70) {
+                $tips[] = "High humidity - choose breathable fabrics.";
+            } elseif ($humidity < 30) {
+                $tips[] = "Low humidity - consider moisturizing your skin.";
+            }
+        }
+
+        return $tips;
     }
 
     private function getClothingSuggestion($season, $gender, $occasion)
@@ -113,18 +167,6 @@ class ClothingImageController extends Controller
         Session::put('search_count', ($searchCount + 1) % self::MAX_SEARCH_COUNT);
 
         return [$imageUrl]; // Just return one new image each time
-    }
-
-    private function getTips($season)
-    {
-        $tips = [
-            'Winter' => ['Layer up with thermals', 'Wear insulated boots', 'Use moisturizers for dry skin', 'Choose wool and fleece', 'Stay covered from wind'],
-            'Summer' => ['Prefer light cotton', 'Use sunscreen daily', 'Stay hydrated', 'Wear sunglasses and hats', 'Avoid dark colors'],
-            'Spring' => ['Choose pastel colors', 'Carry a light jacket', 'Wear comfy shoes', 'Use floral prints', 'Keep an umbrella'],
-            'Autumn' => ['Try earthy tones', 'Use light layering', 'Wear scarves and boots', 'Stay warm in chilly mornings', 'Pick cozy knits']
-        ];
-
-        return $tips[$season] ?? [];
     }
 }
 

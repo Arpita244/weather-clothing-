@@ -2,285 +2,430 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Seasonal Clothing Suggestion</title>
+  <title>Weather-Based Clothing Suggestions</title>
   <link rel="manifest" href="/manifest.json">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
-      --bg-light: #f7f7f7;
-      --bg-dark: #121212;
-      --text-light: #f5f5f5;
-      --text-dark: #2f2f2f;
-      --accent-color: #3498db;
-      --highlight-color: #f39c12;
-      --button-hover-color: #2980b9;
-      --card-shadow: rgba(0, 0, 0, 0.1);
-      --transition-speed: 0.3s;
-      --font-family: 'Segoe UI', sans-serif;
+      --primary-color: #4A90E2;
+      --secondary-color: #F39C12;
+      --accent-color: #2ECC71;
+      --background-color: #F5F7FA;
+      --card-bg: #FFFFFF;
+      --text-color: #2C3E50;
+      --light-text: #95A5A6;
+      --error-color: #E74C3C;
+      --success-color: #27AE60;
+      --border-radius: 12px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
     }
 
     .dark-mode {
-      --bg-light: #1c1c1c;
-      --text-light: #e6e6e6;
-      --accent-color: #1abc9c;
-      --highlight-color: #ff6347;
-      --button-hover-color: #16a085;
+      --background-color: #1a1a1a;
+      --card-bg: #2d2d2d;
+      --text-color: #FFFFFF;
+      --light-text: #95A5A6;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
     body {
-      font-family: var(--font-family);
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      padding: 40px 20px;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
       margin: 0;
-      transition: all var(--transition-speed) ease-in-out;
+      padding: 20px;
+      transition: var(--transition);
+    }
+
+    .header {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-    }
-
-    h1, h3 {
-      font-size: 2.3rem;
-      text-align: center;
-      margin-bottom: 25px;
-      color: var(--accent-color);
-    }
-
-    form {
-      width: 100%;
-      max-width: 600px;
-      background: #fff;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 4px 25px var(--card-shadow);
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
       margin-bottom: 40px;
     }
 
-    form div {
-      margin-bottom: 20px;
+    h1 {
+      font-size: 2rem;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .auth-btn {
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .login-btn {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .register-btn {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow);
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 30px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .form-section, .suggestions-section {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .form-group {
+      margin-bottom: 24px;
     }
 
     label {
-      font-weight: 600;
-      margin-bottom: 8px;
       display: block;
-      color: var(--text-dark);
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-color);
     }
 
-    select, button {
+    input[type="text"],
+    select {
       width: 100%;
       padding: 12px 16px;
+      border: 1px solid var(--light-text);
+      border-radius: var(--border-radius);
+      background: var(--card-bg);
+      color: var(--text-color);
       font-size: 1rem;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      transition: all var(--transition-speed);
+      transition: var(--transition);
     }
 
-    select {
-      background-color: #fff;
-      color: var(--text-dark);
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     }
 
     button {
-      margin-top: 20px;
-      background-color: var(--accent-color);
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary-color);
       color: white;
       border: none;
+      border-radius: var(--border-radius);
       font-weight: 600;
       cursor: pointer;
+      transition: var(--transition);
     }
 
     button:hover {
-      background-color: var(--button-hover-color);
-      transform: scale(1.05);
+      background-color: #357ABD;
+      transform: translateY(-2px);
     }
 
-    .theme-toggle-btn {
-      background-color: var(--highlight-color);
-      padding: 12px 24px;
-      font-size: 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      border: none;
-      color: white;
-      margin-bottom: 40px;
-      transition: background-color var(--transition-speed);
+    .weather-info {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(74, 144, 226, 0.1);
+      border-radius: var(--border-radius);
     }
 
-    .theme-toggle-btn:hover {
-      background-color: #e74c3c;
+    .weather-info h4 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    .weather-info p {
+      margin: 10px 0;
+      color: var(--text-color);
     }
 
     .image-container {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 25px;
-      justify-content: center;
-      margin-bottom: 30px;
+      margin-top: 30px;
     }
 
-    .image-container div {
-      background-color: white;
-      border-radius: 16px;
+    .outfit-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
       overflow: hidden;
-      box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
-      transition: transform var(--transition-speed);
-      max-width: 320px;
-      position: relative;
-      padding-bottom: 10px;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
     }
 
-    .image-container div:hover {
+    .outfit-card:hover {
       transform: translateY(-5px);
     }
 
-    .image-container img {
+    .outfit-image {
       width: 100%;
-      height: auto;
-      display: block;
+      height: 300px;
+      object-fit: cover;
     }
 
-    .download-btn, .share-btn {
-      display: block;
-      width: 80%;
-      margin: 10px auto 0;
-      padding: 10px;
-      text-align: center;
+    .outfit-info {
+      padding: 15px;
+    }
+
+    .outfit-actions {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px;
       border: none;
-      border-radius: 8px;
-      font-weight: 600;
+      border-radius: var(--border-radius);
+      font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .download-btn {
-      background-color: var(--highlight-color);
-      color: white;
-    }
-
-    .download-btn:hover {
-      background-color: #e74c3c;
-    }
-
-    .share-btn {
-      background: linear-gradient(to right, #00c6ff, #0072ff);
-      color: white;
-      margin-top: 8px;
-    }
-
-    .share-btn:hover {
-      box-shadow: 0 0 10px #00c6ff;
-    }
-
-    ul {
-      max-width: 700px;
-      padding-left: 0;
-      list-style: none;
-    }
-
-    ul li {
-      background: #fff;
-      margin: 10px 0;
-      padding: 12px 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      transition: var(--transition);
       display: flex;
       align-items: center;
-      font-weight: 500;
+      justify-content: center;
+      gap: 5px;
     }
 
-    ul li::before {
-      content: '✔️';
-      margin-right: 10px;
+    .heart-button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--light-text);
+      transition: var(--transition);
+      padding: 5px;
+      width: auto;
+    }
+
+    .heart-button.active {
+      color: var(--error-color);
+    }
+
+    .heart-button:hover {
+      transform: scale(1.1);
+      background: none;
+    }
+
+    .tips-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(46, 204, 113, 0.1);
+      border-radius: var(--border-radius);
+    }
+
+    .tips-section h4 {
       color: var(--accent-color);
+      margin-bottom: 15px;
+    }
+
+    .tips-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips-list li {
+      margin-bottom: 10px;
+      padding: 12px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tips-list li::before {
+      content: "💡";
     }
 
     @media (max-width: 768px) {
-      form {
-        padding: 20px;
+      .container {
+        grid-template-columns: 1fr;
       }
-
-      h1 {
-        font-size: 2rem;
+      
+      .header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
       }
 
       .image-container {
-        flex-direction: column;
-        align-items: center;
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
 
-<h1>Clothing Suggestion for <span>{{ $season }}</span></h1>
-
-<button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
-
-<form method="POST" action="/">
-  @csrf
-  <div>
-    <label for="season">Choose a season:</label>
-    <select name="season" id="season">
-      <option value="Winter" {{ $season == 'Winter' ? 'selected' : '' }}>Winter</option>
-      <option value="Spring" {{ $season == 'Spring' ? 'selected' : '' }}>Spring</option>
-      <option value="Summer" {{ $season == 'Summer' ? 'selected' : '' }}>Summer</option>
-      <option value="Autumn" {{ $season == 'Autumn' ? 'selected' : '' }}>Autumn</option>
-    </select>
+<div class="header">
+  <h1>Weather-Based Clothing Suggestions</h1>
+  
+  <div class="auth-buttons">
+    @auth
+      <a href="{{ route('home') }}" class="auth-btn login-btn">
+        <i class="fas fa-user"></i> My Profile
+      </a>
+    @else
+      <a href="{{ route('login') }}" class="auth-btn login-btn">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </a>
+      <a href="{{ route('register') }}" class="auth-btn register-btn">
+        <i class="fas fa-user-plus"></i> Register
+      </a>
+    @endauth
   </div>
 
-  <div>
-    <label for="gender">Gender:</label>
-    <select name="gender" id="gender">
-      <option value="Male" {{ $gender == 'Male' ? 'selected' : '' }}>Male</option>
-      <option value="Female" {{ $gender == 'Female' ? 'selected' : '' }}>Female</option>
-    </select>
-  </div>
+  <label class="theme-toggle">
+    <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
+    <span class="slider"></span>
+  </label>
+</div>
 
-  <div>
-    <label for="occasion">Occasion:</label>
-    <select name="occasion" id="occasion">
-      <option value="Casual" {{ $occasion == 'Casual' ? 'selected' : '' }}>Casual</option>
-      <option value="Formal" {{ $occasion == 'Formal' ? 'selected' : '' }}>Formal</option>
-      <option value="Party" {{ $occasion == 'Party' ? 'selected' : '' }}>Party</option>
-    </select>
-  </div>
-
-  <button type="submit">Get Suggestions</button>
-</form>
-
-@if(isset($imageUrls))
-  <div class="image-container">
-    @foreach($imageUrls as $img)
-      <div>
-        <img src="{{ $img }}" alt="Suggested outfit">
-        <a href="{{ $img }}" download>
-          <button class="download-btn">Download</button>
-        </a>
-        <button class="share-btn" onclick="shareImage('{{ $img }}')">📤 Share</button>
+<div class="container">
+  <div class="form-section">
+    <form method="POST" action="/">
+      @csrf
+      <div class="form-group">
+        <label for="city">
+          <i class="fas fa-map-marker-alt"></i> Enter City
+        </label>
+        <input type="text" name="city" id="city" value="{{ $city }}" placeholder="e.g., New York" required>
       </div>
-    @endforeach
-  </div>
-@endif
 
-@if(isset($tips))
-  <h3>Tips for {{ $season }}</h3>
-  <ul>
-    @foreach($tips as $tip)
-      <li>{{ $tip }}</li>
-    @endforeach
-  </ul>
-@endif
+      <div class="form-group">
+        <label for="gender">
+          <i class="fas fa-user"></i> Gender
+        </label>
+        <select name="gender" id="gender">
+          <option value="Male" {{ $gender == 'Male' ? 'selected' : '' }}>Male</option>
+          <option value="Female" {{ $gender == 'Female' ? 'selected' : '' }}>Female</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="occasion">
+          <i class="fas fa-calendar-alt"></i> Occasion
+        </label>
+        <select name="occasion" id="occasion">
+          <option value="Casual" {{ $occasion == 'Casual' ? 'selected' : '' }}>Casual</option>
+          <option value="Formal" {{ $occasion == 'Formal' ? 'selected' : '' }}>Formal</option>
+          <option value="Party" {{ $occasion == 'Party' ? 'selected' : '' }}>Party</option>
+        </select>
+      </div>
+
+      <button type="submit">
+        <i class="fas fa-search"></i> Get Suggestions
+      </button>
+    </form>
+
+    @if(isset($temperature))
+      <div class="weather-info">
+        <h4><i class="fas fa-cloud-sun"></i> Current Weather in {{ $city }}</h4>
+        <p><i class="fas fa-temperature-high"></i> Temperature: {{ $temperature }}°C</p>
+        <p><i class="fas fa-cloud"></i> Weather: {{ $weatherDescription }}</p>
+        <p><i class="fas fa-tint"></i> Humidity: {{ $humidity }}%</p>
+        <p><i class="fas fa-calendar-day"></i> Suggested Season: {{ $season }}</p>
+      </div>
+    @endif
+  </div>
+
+  <div class="suggestions-section">
+    <h3>Suggested Outfits</h3>
+    <div class="image-container">
+      @if(isset($imageUrls))
+        @foreach($imageUrls as $img)
+          <div class="outfit-card">
+            <img src="{{ $img }}" alt="Suggested outfit" class="outfit-image">
+            <div class="outfit-info">
+              <p>{{ $suggestedOutfit }}</p>
+            </div>
+            <div class="outfit-actions">
+              <button class="action-btn" onclick="window.open('{{ $img }}', '_blank')">
+                <i class="fas fa-download"></i> Download
+              </button>
+              <button class="action-btn" onclick="shareImage('{{ $img }}')">
+                <i class="fas fa-share-alt"></i> Share
+              </button>
+              <button class="heart-button {{ isset($heartedOutfits) && $heartedOutfits->contains('image_url', $img) ? 'active' : '' }}" 
+                      onclick="toggleHeart(this)" 
+                      data-outfit="{{ $suggestedOutfit }}" 
+                      data-weather="{{ $weather ?? '' }}" 
+                      data-temperature="{{ $temperature ?? '' }}"
+                      data-image-url="{{ $img }}"
+                      @if(isset($heartedOutfits))
+                        @foreach($heartedOutfits as $heartedOutfit)
+                          @if($heartedOutfit->image_url === $img)
+                            data-outfit-id="{{ $heartedOutfit->id }}"
+                          @endif
+                        @endforeach
+                      @endif>
+                ♥
+              </button>
+            </div>
+          </div>
+        @endforeach
+      @endif
+    </div>
+
+    @if(isset($tips))
+      <div class="tips-section">
+        <h4><i class="fas fa-lightbulb"></i> Tips for {{ $season }}</h4>
+        <ul class="tips-list">
+          @foreach($tips as $tip)
+            <li>{{ $tip }}</li>
+          @endforeach
+        </ul>
+      </div>
+    @endif
+  </div>
+</div>
 
 <script>
   function toggleTheme() {
-    document.body.classList.toggle("dark-mode");
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+  }
+
+  // Check for saved theme preference
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.getElementById('theme-toggle').checked = true;
   }
 
   function shareImage(imgUrl) {
     if (navigator.share) {
       navigator.share({
         title: 'Check out this outfit suggestion!',
-        text: 'Here’s an outfit suggestion I found perfect for the season!',
+        text: 'Here\'s an outfit suggestion I found perfect for the weather!',
         url: imgUrl
       }).then(() => {
         console.log('Shared successfully');
@@ -292,27 +437,84 @@
     }
   }
 
-  window.onload = function () {
-    if (!document.getElementById('season').value) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const lat = position.coords.latitude;
-        const month = new Date().getMonth() + 1;
+  function toggleHeart(button) {
+    const isHearted = button.classList.contains('active');
+    const outfitData = {
+      outfit_description: button.dataset.outfit,
+      weather_condition: button.dataset.weather,
+      temperature: button.dataset.temperature,
+      image_url: button.dataset.imageUrl,
+      _token: document.querySelector('meta[name="csrf-token"]').content
+    };
 
-        let season;
-        if ((lat > 0 && [12, 1, 2].includes(month)) || (lat < 0 && [6, 7, 8].includes(month))) {
-          season = 'Winter';
-        } else if ([3, 4, 5].includes(month)) {
-          season = 'Spring';
-        } else if ([6, 7, 8].includes(month)) {
-          season = 'Summer';
-        } else {
-          season = 'Autumn';
-        }
-
-        document.getElementById('season').value = season;
-      });
+    if (isHearted && button.dataset.outfitId) {
+      outfitData.outfit_id = button.dataset.outfitId;
     }
+
+    fetch(isHearted ? '/unheart-outfit' : '/heart-outfit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify(outfitData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        button.classList.toggle('active');
+        if (!isHearted && data.outfit) {
+          button.dataset.outfitId = data.outfit.id;
+        }
+        const message = isHearted ? 'Outfit removed from favorites' : 'Outfit saved to favorites!';
+        showNotification(message, data.success);
+      } else {
+        showNotification(data.message || 'Failed to update outfit preference', false);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showNotification('Failed to update outfit preference', false);
+    });
   }
+
+  function showNotification(message, isSuccess) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+    notification.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      background: ${isSuccess ? 'var(--success-color)' : 'var(--error-color)'};
+      color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      animation: slideIn 0.3s ease-out;
+      z-index: 1000;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease-out';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Add CSS animations
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
 </script>
 
 </body>
